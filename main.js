@@ -1,23 +1,42 @@
+const title = prompt("Nhap cong viec moi", "Cong viec 1")
+console.log(title);
+
 const tasks = [
     {
-        title: "Quet nha",
-        completed: true,
-    },
-    {
-        title: "Rua bat",
-        completed: false,
-    },
-    {
-        title: "Nau com",
-        completed: false,
-    },
+        title: "Cong viec 0",
+        completed: false
+    }
 ];
 
-const taskList = document.querySelector("#task-list")
+const taskList = document.querySelector("#task-list");
+const todoForm = document.querySelector("#todo-form");
+const todoInput = document.querySelector("#todo-input");
 
-const html = tasks.map(
-    (task) =>
-        `<li class="task-item ${task.completed ? "completed" : ""}">
+todoForm.onsubmit = function (e) {
+    e.preventDefault();
+    const value = todoInput.value.trim();
+
+    if (!value) {
+        return alert("Please write sth!");
+    }
+
+    const newTask = {
+        title: value,
+        completed: false,
+    };
+    tasks.push(newTask);
+
+    // rerender
+    render();
+
+    todoInput.value = "" // xóa input sau nhập
+};
+
+function render() {
+    const html = tasks
+        .map(
+            (task) =>
+                `<li class="task-item ${task.completed ? "completed" : ""}">
                     <span class="task-title">${task.title}</span>
                     <div class="task-action">
                         <button class="task-btn edit">Edit</button>
@@ -25,6 +44,10 @@ const html = tasks.map(
                         <button class="task-btn delete">Delete</button>
                     </div>
                 </li>`,
-).join("");
+        )
+        .join("");
 
-taskList.innerHTML = html
+    taskList.innerHTML = html;
+}
+
+render(); //hiện task có sẵn
