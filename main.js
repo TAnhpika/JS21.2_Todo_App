@@ -1,6 +1,3 @@
-// const title = prompt("Nhap cong viec moi", "Cong viec 1")
-// console.log(title);
-
 const tasks = [
     {
         title: "Nau com",
@@ -20,7 +17,7 @@ const taskList = document.querySelector("#task-list");
 const todoForm = document.querySelector("#todo-form");
 const todoInput = document.querySelector("#todo-input");
 
-taskList.onclick = function (e) {
+function handleTaskActions(e) {
     const taskItem = e.target.closest(".task-item");
     const taskIndex = +taskItem.getAttribute("task-index");
     const task = tasks[taskIndex];
@@ -28,35 +25,36 @@ taskList.onclick = function (e) {
     if (e.target.closest(".edit")) {
         const newTitle = prompt("Enter the new task title: ", task.title);
         task.title = newTitle;
-        render();
+        renderTasks();
     } else if (e.target.closest(".done")) {
-        console.log("Mark as done/undone");
+        task.completed = !task.completed;
+        renderTasks();
     } else if (e.target.closest(".delete")) {
-        console.log("Delete");
+        if (confirm(`Are you sure you want to delete "${task.title}"?`)) {
+            tasks.splice(taskIndex, 1);
+            renderTasks();
+        }
     }
 };
 
-todoForm.onsubmit = function (e) {
+function addTask(e) {
     e.preventDefault();
     const value = todoInput.value.trim();
 
-    if (!value) {
-        return alert("Please write sth!");
-    }
+    if (!value) return alert("Please write sth!");
 
-    const newTask = {
+    tasks.push({
         title: value,
         completed: false,
-    };
-    tasks.push(newTask);
+    });
 
-    // re-render
-    render();
+    // re-renderTasks
+    renderTasks();
 
     todoInput.value = ""; // xóa input sau nhập
 };
 
-function render() {
+function renderTasks() {
     const html = tasks
         .map(
             (task, index) =>
@@ -74,4 +72,8 @@ function render() {
     taskList.innerHTML = html;
 }
 
-render(); //hiện task có sẵn
+
+todoForm.addEventListener("submit", addTask)
+taskList.addEventListener("click", handleTaskActions)
+
+renderTasks(); //hiện task có sẵn
