@@ -31,6 +31,11 @@ function handleTaskActions(e) {
         if (!newTitle.trim()) {
             return alert("Task title cannot be empty!");
         }
+
+        // k check trùng task có index hiện tại - khi edit nhưng k edit thì vẫn đc
+        let isDuplicate = tasks.some((task, index) => task.title.toLowerCase() === newTitle.toLowerCase() && index !== taskIndex);
+        if (isDuplicate) return alert("Task with this title already exist! Please use a different task title!");
+
         task.title = newTitle;
         renderTasks();
         return;
@@ -53,6 +58,9 @@ function addTask(e) {
     const value = todoInput.value.trim();
 
     if (!value) return alert("Please write sth!");
+
+    let isDuplicate = tasks.some((task) => task.title.toLowerCase() === value.toLowerCase());
+    if (isDuplicate) return alert("Task with this title already exist! Please use a different task title!");
 
     tasks.push({
         title: value,
