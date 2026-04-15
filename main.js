@@ -1,16 +1,16 @@
 const tasks = [
-    {
-        title: "Nau com",
-        completed: false,
-    },
-    {
-        title: "Quet nha",
-        completed: false,
-    },
-    {
-        title: "Rua bat",
-        completed: false,
-    },
+    // {
+    //     title: "Nau com",
+    //     completed: false,
+    // },
+    // {
+    //     title: "Quet nha",
+    //     completed: false,
+    // },
+    // {
+    //     title: "Rua bat",
+    //     completed: false,
+    // },
 ];
 
 const taskList = document.querySelector("#task-list");
@@ -35,7 +35,7 @@ function handleTaskActions(e) {
             renderTasks();
         }
     }
-};
+}
 
 function addTask(e) {
     e.preventDefault();
@@ -52,9 +52,13 @@ function addTask(e) {
     renderTasks();
 
     todoInput.value = ""; // xóa input sau nhập
-};
+}
 
 function renderTasks() {
+    if (!tasks.length) {
+        taskList.innerHTML = `<li class="empty-message">No tasks available</li>`;
+        return;
+    }
     const html = tasks
         .map(
             (task, index) =>
@@ -72,8 +76,7 @@ function renderTasks() {
     taskList.innerHTML = html;
 }
 
-
-todoForm.addEventListener("submit", addTask)
-taskList.addEventListener("click", handleTaskActions)
+todoForm.addEventListener("submit", addTask);
+taskList.addEventListener("click", handleTaskActions);
 
 renderTasks(); //hiện task có sẵn
