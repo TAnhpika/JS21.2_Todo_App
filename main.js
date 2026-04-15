@@ -1,16 +1,16 @@
 const tasks = [
-    // {
-    //     title: "Nau com",
-    //     completed: false,
-    // },
-    // {
-    //     title: "Quet nha",
-    //     completed: false,
-    // },
-    // {
-    //     title: "Rua bat",
-    //     completed: false,
-    // },
+    {
+        title: "Nau com",
+        completed: false,
+    },
+    {
+        title: "Quet nha",
+        completed: false,
+    },
+    {
+        title: "Rua bat",
+        completed: false,
+    },
 ];
 
 const taskList = document.querySelector("#task-list");
@@ -24,12 +24,23 @@ function handleTaskActions(e) {
 
     if (e.target.closest(".edit")) {
         const newTitle = prompt("Enter the new task title: ", task.title);
+
+        // khi nhấn cancel prompt sẽ trả về null -> fix null khi cancel
+        if (newTitle === null) return;
+
+        if (!newTitle.trim()) {
+            return alert("Task title cannot be empty!");
+        }
         task.title = newTitle;
         renderTasks();
-    } else if (e.target.closest(".done")) {
+        return;
+    }
+    if (e.target.closest(".done")) {
         task.completed = !task.completed;
         renderTasks();
-    } else if (e.target.closest(".delete")) {
+        return;
+    }
+    if (e.target.closest(".delete")) {
         if (confirm(`Are you sure you want to delete "${task.title}"?`)) {
             tasks.splice(taskIndex, 1);
             renderTasks();
