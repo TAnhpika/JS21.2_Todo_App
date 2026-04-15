@@ -1,3 +1,4 @@
+// Task: TÌm hiểu JSON & LocaleStorage -> lưu task
 const tasks = [
     {
         title: "Nau com",
@@ -17,6 +18,15 @@ const taskList = document.querySelector("#task-list");
 const todoForm = document.querySelector("#todo-form");
 const todoInput = document.querySelector("#todo-input");
 
+function isDuplicateTask(newTitle, excludeIndex = -1) {
+    let isDuplicate = tasks.some(
+        (task, index) =>
+            task.title.toLowerCase() === newTitle.toLowerCase() &&
+            // k check trùng task có index hiện tại - khi edit nhưng k edit thì vẫn đc
+            index !== excludeIndex, // -1 lun đúng vì mảng index dương
+    );
+    return isDuplicate;
+}
 function handleTaskActions(e) {
     const taskItem = e.target.closest(".task-item");
     const taskIndex = +taskItem.getAttribute("task-index");
@@ -32,9 +42,10 @@ function handleTaskActions(e) {
             return alert("Task title cannot be empty!");
         }
 
-        // k check trùng task có index hiện tại - khi edit nhưng k edit thì vẫn đc
-        let isDuplicate = tasks.some((task, index) => task.title.toLowerCase() === newTitle.toLowerCase() && index !== taskIndex);
-        if (isDuplicate) return alert("Task with this title already exist! Please use a different task title!");
+        if (isDuplicateTask(newTitle, taskIndex))
+            return alert(
+                "Task with this title already exist! Please use a different task title!",
+            );
 
         task.title = newTitle;
         renderTasks();
@@ -59,8 +70,10 @@ function addTask(e) {
 
     if (!value) return alert("Please write sth!");
 
-    let isDuplicate = tasks.some((task) => task.title.toLowerCase() === value.toLowerCase());
-    if (isDuplicate) return alert("Task with this title already exist! Please use a different task title!");
+    if (isDuplicateTask(value))
+        return alert(
+            "Task with this title already exist! Please use a different task title!",
+        );
 
     tasks.push({
         title: value,
