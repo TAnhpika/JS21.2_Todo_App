@@ -1,18 +1,14 @@
 // Task: TÌm hiểu JSON & LocaleStorage -> lưu task
-const tasks = [
-    {
-        title: "Nau com",
-        completed: false,
-    },
-    {
-        title: "Quet nha",
-        completed: false,
-    },
-    {
-        title: "Rua bat",
-        completed: false,
-    },
-];
+
+/*
+LocaleStorage: chỉ lưu chuỗi / ép chuỗi. có 5mb. lưu dài hạn, k tự xóa
+JSON: định dạng dữ liệu (chuỗi) -> chuyển array, object, boolean.. thành chuỗi -> có thể khôi phục ngược lại
+- stringify: chuyển JS thành JSON 
+- parse: ngc lạ
+*/
+
+// Lấy dữ liệu cũ hoặc tạo mảng rỗng nếu chưa có gì
+const tasks = JSON.parse(localStorage.getItem("myTasks")) ?? [];
 
 const taskList = document.querySelector("#task-list");
 const todoForm = document.querySelector("#todo-form");
@@ -27,6 +23,7 @@ function isDuplicateTask(newTitle, excludeIndex = -1) {
     );
     return isDuplicate;
 }
+
 function handleTaskActions(e) {
     const taskItem = e.target.closest(".task-item");
     const taskIndex = +taskItem.getAttribute("task-index");
@@ -48,18 +45,18 @@ function handleTaskActions(e) {
             );
 
         task.title = newTitle;
-        renderTasks();
+        saveAndRender();
         return;
     }
     if (e.target.closest(".done")) {
         task.completed = !task.completed;
-        renderTasks();
+        saveAndRender();
         return;
     }
     if (e.target.closest(".delete")) {
         if (confirm(`Are you sure you want to delete "${task.title}"?`)) {
             tasks.splice(taskIndex, 1);
-            renderTasks();
+            saveAndRender();
         }
     }
 }
@@ -80,8 +77,7 @@ function addTask(e) {
         completed: false,
     });
 
-    // re-renderTasks
-    renderTasks();
+    saveAndRender();
 
     todoInput.value = ""; // xóa input sau nhập
 }
@@ -106,6 +102,14 @@ function renderTasks() {
         .join("");
 
     taskList.innerHTML = html;
+}
+
+function saveAndRender() {
+    // Lưu mảng mới vào LocalStorage (phải stringify)
+    localStorage.setItem("myTasks", JSON.stringify(tasks));
+
+    // Render lại giao diện
+    renderTasks();
 }
 
 todoForm.addEventListener("submit", addTask);
