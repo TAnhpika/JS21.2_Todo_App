@@ -4,7 +4,7 @@
 LocaleStorage: chỉ lưu chuỗi / ép chuỗi. có 5mb. lưu dài hạn, k tự xóa
 JSON: định dạng dữ liệu (chuỗi) -> chuyển array, object, boolean.. thành chuỗi -> có thể khôi phục ngược lại
 - stringify: chuyển JS thành JSON 
-- parse: ngc lạ
+- parse: ngc lại
 */
 
 // Lấy dữ liệu cũ hoặc tạo mảng rỗng nếu chưa có gì
@@ -26,7 +26,15 @@ function isDuplicateTask(newTitle, excludeIndex = -1) {
 
 function handleTaskActions(e) {
     const taskItem = e.target.closest(".task-item");
-    const taskIndex = +taskItem.getAttribute("task-index");
+
+    // click 'No tasks available' sẽ k bị lỗi nữa
+    if (!taskItem) return;
+    
+    // const taskIndex = +taskItem.getAttribute("data-index");
+    const taskIndex = +taskItem.dataset.index; // ngắn gọn hơn khi đặt tên theo format
+
+    console.log(taskIndex);
+    
     const task = tasks[taskIndex];
 
     if (e.target.closest(".edit")) {
@@ -90,7 +98,8 @@ function renderTasks() {
     const html = tasks
         .map(
             (task, index) =>
-                `<li class="task-item ${task.completed ? "completed" : ""}" task-index="${index}">
+                // task-index vi phạm HTML validator -> data-index
+                `<li class="task-item ${task.completed ? "completed" : ""}" data-index="${index}">
                     <span class="task-title">${task.title}</span>
                     <div class="task-action">
                         <button class="task-btn edit">Edit</button>
