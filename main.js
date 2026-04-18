@@ -126,7 +126,7 @@ function renderTasks() {
                 `<li class="task-item ${
                     task.completed ? "completed" : "" // Thêm class "completed" nếu công việc đã hoàn thành
                 }" data-index="${index}">
-                    <span class="task-title">${task.title}</span>
+                    <span class="task-title">${escapeHTML(task.title)}</span>
                     <div class="task-action">
                         <button class="task-btn edit">Edit</button>
                         <button class="task-btn done">${task.completed ? "Mark as undone" : "Mark as done"}</button>
