@@ -1,4 +1,5 @@
-// Task: TÌm hiểu JSON & LocaleStorage -> lưu task
+// @ts-nocheck
+const API_URL = "http://localhost:3000/tasks";
 
 /*
 LocaleStorage: chỉ lưu chuỗi / ép chuỗi. có 5mb. lưu dài hạn, k tự xóa
@@ -8,12 +9,31 @@ JSON: định dạng dữ liệu (chuỗi) -> chuyển array, object, boolean.. 
 */
 
 // Lấy danh sách công việc từ localStorage (nếu không có thì khởi tạo mảng rỗng)
-const tasks = JSON.parse(localStorage.getItem("myTasks")) ?? [];
+let tasks = [];
 
 // Truy cập vào các phần tử trong DOM
 const taskList = document.querySelector("#task-list"); // Danh sách công việc
 const todoForm = document.querySelector("#todo-form"); // Form thêm công việc
 const todoInput = document.querySelector("#todo-input"); // Input để nhập tên công việc
+
+async function fetchTasks() {
+    const response = await fetch(API_URL);
+    tasks = await response.json();
+    renderTasks()
+}
+
+async function createTask(task) {
+    const response = await fetch(API_URL, {
+        method: "POST",
+        header: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(task)
+    })
+    const newTask = await response.json()
+    tasks.push(newTask)
+    renderTasks()
+}
 
 // Hàm để escape HTML nhằm ngăn ngừa XSS
 function escapeHTML(html) {
@@ -92,7 +112,7 @@ function handleTaskActions(e) {
 }
 
 // Thêm công việc mới
-function addTask(e) {
+async function addTask(e) {
     e.preventDefault(); // Ngăn chặn hành vi mặc định của form
     const value = todoInput.value.trim(); // Lấy giá trị input và xóa khoảng trắng thừa
 
@@ -103,12 +123,10 @@ function addTask(e) {
             "Task with this title already exist! Please use a different task title!",
         ); // Cảnh báo nếu tiêu đề trùng lặp
 
-    tasks.push({
-        title: value, // Tiêu đề công việc
-        completed: false, // Mặc định chưa hoàn thành
-    });
-
-    saveAndRender();
+    await createTask({
+        title: value,
+        completed: false
+    })
 
     todoInput.value = ""; // xóa input sau nhập
 }
@@ -136,7 +154,7 @@ function renderTasks() {
         )
         .join(""); // Kết hợp tất cả các phần tử thành một chuỗi HTML
 
-    taskList.innerHTML = html;// Chèn HTML vào danh sách
+    taskList.innerHTML = html; // Chèn HTML vào danh sách
 }
 // Lắng nghe sự kiện submit của form
 todoForm.addEventListener("submit", addTask);
@@ -145,4 +163,5 @@ todoForm.addEventListener("submit", addTask);
 taskList.addEventListener("click", handleTaskActions);
 
 // Hiển thị danh sách công việc khi tải trang
-renderTasks();
+// renderTasks();
+fetchTasks();
