@@ -19,22 +19,45 @@ const todoInput = document.querySelector("#todo-input"); // Input để nhập t
 async function fetchTasks() {
     const response = await fetch(API_URL);
     tasks = await response.json();
-    renderTasks()
+    renderTasks();
 }
 
 async function createTask(task) {
     const response = await fetch(API_URL, {
         method: "POST",
         header: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
         },
-        body: JSON.stringify(task)
-    })
-    const newTask = await response.json()
-    tasks.push(newTask)
-    renderTasks()
+        body: JSON.stringify(task),
+    });
+    const newTask = await response.json();
+    tasks.push(newTask);
+    renderTasks();
 }
 
+async function updateTask(id, data) {
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        header: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+    const updatedTask = await response.json();
+    const taskIndex = tasks.findIndex((task) => task.id === id);
+    tasks[taskIndex] = updatedTask;
+    renderTasks();
+}
+
+async function deleteTask(id) {
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+    });
+    await response.json();
+    const taskIndex = tasks.findIndex((task) => task.id === id);
+    tasks.splice(taskIndex, 1)
+    renderTasks( )
+}
 // Hàm để escape HTML nhằm ngăn ngừa XSS
 function escapeHTML(html) {
     const div = document.createElement("div");
@@ -52,17 +75,8 @@ function isDuplicateTask(newTitle, excludeIndex = -1) {
     return isDuplicate;
 }
 
-// Lưu danh sách công việc vào localStorage
-function saveAndRender() {
-    // Chuyển mảng tasks thành chuỗi JSON và lưu
-    localStorage.setItem("myTasks", JSON.stringify(tasks));
-
-    // Render lại giao diện
-    renderTasks();
-}
-
 // Xử lý các hành động trên công việc (sửa, đánh dấu hoàn thành, xóa)
-function handleTaskActions(e) {
+async function handleTaskActions(e) {
     const taskItem = e.target.closest(".task-item"); // Tìm công việc tương ứng với nút được bấm
 
     // click 'No tasks available' sẽ k bị lỗi nữa
@@ -70,9 +84,9 @@ function handleTaskActions(e) {
 
     // Lấy chỉ mục của công việc
     // const taskIndex = +taskItem.getAttribute("data-index");
-    const taskIndex = +taskItem.dataset.index; // ngắn gọn hơn khi đặt tên theo format
+    const taskId = taskItem.dataset.id; // ngắn gọn hơn khi đặt tên theo format
 
-    const task = tasks[taskIndex]; // Lấy công việc từ danh sách
+    const task = tasks.find((task) => task.id === taskId); // Lấy công việc từ danh sách
 
     // Sửa tiêu đề công việc
     if (e.target.closest(".edit")) {
@@ -86,27 +100,31 @@ function handleTaskActions(e) {
             return alert("Task title cannot be empty!"); // Cảnh báo nếu tiêu đề rỗng
         }
 
-        if (isDuplicateTask(newTitle, taskIndex))
+        if (isDuplicateTask(newTitle, taskId))
             return alert(
                 "Task with this title already exist! Please use a different task title!",
             ); // Cảnh báo nếu tiêu đề trùng lặp
 
-        task.title = newTitle; // Cập nhật tiêu đề công việc
-        saveAndRender();
+        await updateTask(taskId, {
+            ...task,
+            title: newTitle,
+        });
+
         return;
     }
 
     // Đánh dấu hoàn thành hoặc chưa hoàn thành
     if (e.target.closest(".done")) {
-        task.completed = !task.completed; // Đảo trạng thái hoàn thành
-        saveAndRender();
+        await updateTask(taskId, {
+            ...task,
+            completed: !task.completed,
+        });
         return;
     }
     // Xóa công việc
     if (e.target.closest(".delete")) {
         if (confirm(`Are you sure you want to delete "${task.title}"?`)) {
-            tasks.splice(taskIndex, 1); // Xóa công việc khỏi mảng
-            saveAndRender();
+            deleteTask(taskId)
         }
     }
 }
@@ -125,8 +143,8 @@ async function addTask(e) {
 
     await createTask({
         title: value,
-        completed: false
-    })
+        completed: false,
+    });
 
     todoInput.value = ""; // xóa input sau nhập
 }
@@ -139,11 +157,10 @@ function renderTasks() {
     }
     const html = tasks
         .map(
-            (task, index) =>
-                // task-index vi phạm HTML validator -> data-index
+            (task) =>
                 `<li class="task-item ${
                     task.completed ? "completed" : "" // Thêm class "completed" nếu công việc đã hoàn thành
-                }" data-index="${index}">
+                }" data-id="${task.id}">
                     <span class="task-title">${escapeHTML(task.title)}</span>
                     <div class="task-action">
                         <button class="task-btn edit">Edit</button>
